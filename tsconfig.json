@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "types": ["vitest/globals", "node"],
+    "paths": {
+      "@common/*": ["./src/common/*"],
+      "@database/*": ["./src/database/*"],
+
+      "@producers/*": ["./src/producers/*"],
+      "@farms/*": ["./src/farms/*"],
+      "@crop-seasons/*": ["./src/crop-seasons/*"],
+      "@crops/*": ["./src/crops/*"],
+      "@plantings/*": ["./src/plantings/*"],
+      "@dashboards/*": ["./src/dashboards/*"],
+
+      "@tests/*": ["./test/*"]
+    }
+  }
+}

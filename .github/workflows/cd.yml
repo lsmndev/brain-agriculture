@@ -1,0 +1,74 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'master'
+
+    environment: production
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+
+          script: |
+            set -e
+
+            cd /opt/brain-agriculture
+
+            echo "Updating source code..."
+            git fetch origin master
+            git reset --hard origin/master
+
+            echo "Building production containers..."
+            docker compose \
+              -f docker-compose.yaml \
+              -f docker-compose.prod.yaml \
+              build
+
+            echo "Starting PostgreSQL and infrastructure..."
+            docker compose \
+              -f docker-compose.yaml \
+              -f docker-compose.prod.yaml \
+              up -d postgres prometheus loki tempo grafana otel-collector
+
+            echo "Running database migrations..."
+            docker compose \
+              -f docker-compose.yaml \
+              -f docker-compose.prod.yaml \
+              run --rm app \
+              npm run migration:run:prod
+
+            echo "Starting application..."
+            docker compose \
+              -f docker-compose.yaml \
+              -f docker-compose.prod.yaml \
+              up -d app
+
+            echo "Removing orphan containers..."
+            docker compose \
+              -f docker-compose.yaml \
+              -f docker-compose.prod.yaml \
+              up -d --remove-orphans
+
+            echo "Removing unused Docker images..."
+            docker image prune -f
+
+            echo "Deployment completed."
