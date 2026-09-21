@@ -385,6 +385,7 @@ Start the application and open:
 
 ```text
 http://localhost:3000/docs
+http://localhost:3000/docs-json
 ```
 
 Swagger documents the request DTOs, validation contract and response models for the API.
