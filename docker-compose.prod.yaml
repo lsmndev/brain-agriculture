@@ -1,0 +1,67 @@
+services:
+  postgres:
+    # PostgreSQL acessível somente pela brain-network.
+    # Não expõe 5432 no host/Internet.
+    ports: !reset []
+
+  app:
+    build:
+      context: .
+      target: production
+
+    user: node
+
+    # Remove os bind mounts usados em desenvolvimento.
+    volumes: !reset []
+
+    environment:
+      NODE_ENV: production
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_SSL: ${DB_SSL:-false}
+
+      DB_APPLICATION_NAME: ${DB_APPLICATION_NAME:-brain-agriculture}
+      DB_POOL_MAX: ${DB_POOL_MAX:-10}
+      DB_POOL_IDLE_TIMEOUT_MS: ${DB_POOL_IDLE_TIMEOUT_MS:-30000}
+      DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS:-5000}
+      DB_STATEMENT_TIMEOUT_MS: ${DB_STATEMENT_TIMEOUT_MS:-30000}
+
+      PORT: ${PORT:-3000}
+
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+
+      RATE_LIMIT_TTL_MS: ${RATE_LIMIT_TTL_MS:-60000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME}
+      OTEL_RESOURCE_ATTRIBUTES: ${OTEL_RESOURCE_ATTRIBUTES}
+
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}
+      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT}
+
+  otel-collector:
+    # 4317/4318/13133 ficam disponíveis apenas entre containers.
+    ports: !reset []
+
+  prometheus:
+    # Grafana acessa http://prometheus:9090 pela brain-network.
+    ports: !reset []
+
+  loki:
+    # Grafana acessa http://loki:3100 pela brain-network.
+    ports: !reset []
+
+  tempo:
+    # Grafana acessa http://tempo:3200 pela brain-network.
+    ports: !reset []
+
+  grafana:
+    # Mantido público para demonstração.
+    ports:
+      - "3001:3000"
