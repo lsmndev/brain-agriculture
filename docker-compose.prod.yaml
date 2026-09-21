@@ -65,3 +65,22 @@ services:
     # Mantido público para demonstração.
     ports:
       - "3001:3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: brain-nginx
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/www:/var/www/certbot:ro
+
+    depends_on:
+      app:
+        condition: service_healthy
+
+    networks:
+      - brain-network
